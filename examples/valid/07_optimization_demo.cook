@@ -1,0 +1,25 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 07: Multi-Pass Optimization Showcase
+// Demonstrates unit conversion, adjacent batch merging, and instruction reduction
+// ============================================================================
+
+RECIPE PANCAKE;
+
+# Consecutive additions of identical ingredient: FLOUR
+# Optimizer Pass 2 will merge these two into a single 300 GRAM batch!
+ADD(150, GRAM, FLOUR);
+ADD(150, GRAM, FLOUR);
+
+# Unit normalization: CUP and TBSP will be canonicalized to base ML
+ADD(1, CUP, MILK);
+ADD(2, TBSP, BUTTER);
+ADD(1, PIECE, EGG);
+
+# Consecutive mixing steps:
+# Optimizer Pass 2 will combine 60 SECONDS + 120 SECONDS into 180 SECONDS!
+MIX(60, SECONDS);
+MIX(120, SECONDS);
+
+FRY(4, MINUTES);
+
+SERVE;

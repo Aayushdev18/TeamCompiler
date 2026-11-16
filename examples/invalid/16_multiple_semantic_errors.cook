@@ -1,0 +1,20 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 16: Multiple Independent Semantic Errors
+// Demonstrates that the semantic analyzer catches multiple errors at once
+// ============================================================================
+
+RECIPE PANCAKE;
+
+# Error 1: Negative quantity
+ADD(-3, CUP, FLOUR);
+
+# Error 2: Incompatible measurement unit (egg in milliliters)
+ADD(500, ML, EGG);
+
+# Error 3: Incompatible ingredient for pancake (BACON is for savory pasta)
+ADD(100, GRAM, BACON);
+
+# Error 4: Forbidden cooking operation (PANCAKE cannot be boiled)
+BOIL(10, MINUTES);
+
+SERVE;

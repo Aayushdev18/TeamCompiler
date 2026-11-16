@@ -1,0 +1,204 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{url}
+
+\lstset{
+    basicstyle=\footnotesize\ttfamily,
+    frame=single,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{purple}
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Digital Cookbook: An Interactive Domain-Specific Language Compiler for Culinary Automation and Static Verification}
+
+\author{
+\IEEEauthorblockN{[Student 1 Name - Team Lead]}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{[University / Institute Name]}\\
+\textit{Roll No: [Roll Number 1]} \\
+email@institution.edu}
+\and
+\IEEEauthorblockN{[Student 2 Name]}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{[University / Institute Name]}\\
+\textit{Roll No: [Roll Number 2]} \\
+email@institution.edu}
+\and
+\IEEEauthorblockN{[Student 3 Name]}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{[University / Institute Name]}\\
+\textit{Roll No: [Roll Number 3]} \\
+email@institution.edu}
+\and
+\IEEEauthorblockN{[Student 4 Name]}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{[University / Institute Name]}\\
+\textit{Roll No: [Roll Number 4]} \\
+email@institution.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Traditional natural-language culinary recipes are ambiguous, non-standardized, and vulnerable to measurement, sequencing, and semantic contradictions. In modern commercial kitchens and autonomous robotic culinary systems, precise verification and deterministic machine instruction generation are essential. This paper presents \textbf{Digital Cookbook}, an interactive, web-based compiler for a cooking-oriented domain-specific language termed \textbf{Cookbook DSL}. The system implements a complete, decoupled six-phase compiler pipeline: (1) a hand-written character-level scanner with precise coordinate tracking; (2) a recursive-descent syntax parser constructing a strongly-typed Abstract Syntax Tree (AST); (3) a domain-aware semantic analyzer and symbol table enforcing recipe consistency, ingredient compatibility, and execution order; (4) a Three-Address Code (3AC) intermediate representation generator; (5) a multi-pass optimizer performing measurement normalization, adjacent instruction aggregation, and dead-code elimination; and (6) a target code generator emitting Virtual Kitchen Machine (VKM) bytecode assembly. A comprehensive evaluation comprising 42 automated test cases proves the deterministic behavior, rigorous diagnostic reporting, and performance efficiency of the architecture.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Compiler Design, Domain-Specific Languages, Lexical Analysis, Recursive-Descent Parser, Abstract Syntax Tree, Semantic Analysis, Intermediate Representation, Peephole Optimization, Code Generation.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Compilers serve as the fundamental backbone of computer science, translating human-intelligible linguistic constructs into deterministic hardware execution models. While general-purpose languages such as C, Java, and Python prioritize general arithmetic and memory operations, Domain-Specific Languages (DSLs) provide tailored expressive power for specialized application domains. 
+
+In automated culinary manufacturing and intelligent food robotics, natural-language recipes introduce significant hazards: vague volumetric units, unspecified dependencies, missing safety steps, and undefined heating profiles. To address these challenges, we introduce \textbf{Digital Cookbook}, an end-to-end interactive compiler engineering project designed to compile, verify, optimize, and assemble structured cooking instructions into low-level Virtual Kitchen Machine instructions.
+
+\section{Problem Statement}
+Existing recipe representation formats suffer from three critical defects:
+\begin{enumerate}
+    \item \textbf{Ambiguity and Non-determinism}: Vague directives such as ``cook until ready'' prevent automated robotic reproduction.
+    \item \textbf{Absence of Static Verification}: Semantic errors—such as baking an empty vessel, combining incompatible ingredients, or exceeding physical appliance thresholds—are detected only at runtime or after ingredient spoilage.
+    \item \textbf{Inefficient Actuation}: Sequential recipe declarations often describe fragmented ingredient additions that trigger redundant mechanical actuation cycles unless aggregated via formal compiler optimization passes.
+\end{enumerate}
+
+\section{System Architecture}
+The compiler adheres to a classic decoupled six-phase architecture, orchestrated by a central pipeline service. The system is entirely self-contained, deterministic, and free of external AI dependencies.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox{0.9\columnwidth}{
+\centering
+\textbf{Cookbook DSL Source Code}\\
+$\downarrow$\\
+\textbf{Phase 1: Lexical Analysis} (Character Scanner $\rightarrow$ Token Stream)\\
+$\downarrow$\\
+\textbf{Phase 2: Syntax Analysis} (Recursive Descent $\rightarrow$ Typed AST)\\
+$\downarrow$\\
+\textbf{Phase 3: Semantic Analysis} (Context Validation $\rightarrow$ Symbol Table)\\
+$\downarrow$\\
+\textbf{Phase 4: Intermediate Code Generation} (Linear Three-Address Code)\\
+$\downarrow$\\
+\textbf{Phase 5: Code Optimization} (Peephole Merging \& Unit Normalization)\\
+$\downarrow$\\
+\textbf{Phase 6: Target Code Generation} (Virtual Kitchen Machine Assembly)
+}}
+\caption{Digital Cookbook Compiler Pipeline Architecture.}
+\label{fig:architecture}
+\end{figure}
+
+\section{Cookbook DSL Language Specification}
+Cookbook DSL is a declarative, procedural domain-specific language. Every program models one complete culinary preparation.
+
+\subsection{Formal EBNF Grammar}
+The formal syntax is specified in Extended Backus-Naur Form (EBNF):
+\begin{align*}
+\text{program} &\to \text{recipe\_decl}\;\;\{\text{statement}\}\;\;\text{serve\_stmt}\;\;\text{EOF} \\
+\text{recipe\_decl} &\to \text{"RECIPE"}\;\;\text{identifier}\;\;\text{";"} \\
+\text{statement} &\to \text{add\_stmt} \mid \text{timed\_stmt} \mid \text{chop\_stmt} \\
+\text{add\_stmt} &\to \text{"ADD("}\;\text{number}\text{","}\;\text{unit}\text{","}\;\text{identifier}\text{");"} \\
+\text{timed\_stmt} &\to \text{timed\_op}\text{"("}\;\text{number}\text{","}\;\text{time\_unit}\text{");"} \\
+\text{serve\_stmt} &\to \text{"SERVE;"}
+\end{align*}
+
+\section{Compiler Implementation Phases}
+
+\subsection{Phase 1: Lexical Analysis}
+The lexer (\texttt{compiler/lexer.py}) scans UTF-8 source text character-by-character. It preserves token lexemes while accurately tracking line and column numbers. Reserved keywords (\texttt{RECIPE}, \texttt{ADD}, \texttt{MIX}, \texttt{BOIL}, \texttt{BAKE}, \texttt{FRY}, \texttt{SERVE}), measurement units (\texttt{CUP}, \texttt{GRAM}, \texttt{ML}, \texttt{PIECE}), and time units (\texttt{SECONDS}, \texttt{MINUTES}) are categorized. Illegal characters are captured as \texttt{UNKNOWN} tokens and reported via structured diagnostics without crashing.
+
+\subsection{Phase 2: Syntax Analysis}
+The parser (\texttt{compiler/parser.py}) applies top-down recursive descent with panic-mode error recovery. It enforces strict statement structures and constructs an Abstract Syntax Tree composed of strongly-typed dataclasses (\texttt{ProgramNode}, \texttt{AddNode}, \texttt{TimedOpNode}, \texttt{ServeNode}). When a syntax error occurs, the parser logs the diagnostic and synchronizes to the next statement delimiter.
+
+\subsection{Phase 3: Semantic Analysis \& Symbol Table}
+The semantic analyzer (\texttt{compiler/semantic.py}) inspects the AST against a centralized culinary knowledge base. It enforces twelve domain rules:
+\begin{enumerate}
+    \item Verification of dish declaration against supported recipes.
+    \item Ingredient validation and compatibility with the declared dish.
+    \item Physical unit compatibility (e.g., eggs must be in pieces, liquids in milliliters).
+    \item Strictly positive quantity and duration constraints ($q > 0, t > 0$).
+    \item Operational bounds on appliance durations.
+    \item Prohibition of empty-vessel operations.
+    \item Mandatory thermal preparation prior to serving cooked dishes.
+    \item Enforcement of terminal \texttt{SERVE} positioning.
+\end{enumerate}
+The symbol table maintains comprehensive records tracking identifier categories, cumulative quantities, and source locations.
+
+\subsection{Phase 4: Intermediate Code Generation (IR)}
+The intermediate representation generator (\texttt{compiler/ir.py}) linearizes the validated AST into machine-independent Three-Address Code (3AC):
+\begin{lstlisting}[language=Python]
+t1 = RECIPE PANCAKE
+t2 = ADD FLOUR, 150.0 GRAM
+t3 = ADD FLOUR, 150.0 GRAM
+t4 = ADD MILK, 1.0 CUP
+t5 = MIX 2.0 MINUTES
+t6 = SERVE
+\end{lstlisting}
+
+\subsection{Phase 5: Code Optimization}
+The optimizer (\texttt{compiler/optimizer.py}) performs three semantic-preserving transformation passes:
+\begin{enumerate}
+    \item \textbf{Unit Normalization}: Standardizes volume units (\texttt{CUP}, \texttt{TBSP}, \texttt{TSP}) into base milliliters (\texttt{ML}), mass into \texttt{GRAM}, and duration into \texttt{SECONDS}.
+    \item \textbf{Adjacent Instruction Merging}: Combines contiguous additions of identical ingredients without intermediate processing into a single instruction. For instance, consecutive $150\,\text{g}$ additions of flour become a single $300\,\text{g}$ addition.
+    \item \textbf{Dead Code Elimination}: Prunes null-effect instructions.
+\end{enumerate}
+
+\subsection{Phase 6: Target Code Generation (VKM Assembly)}
+The code generator translates optimized IR into bytecode for the Virtual Kitchen Machine (VKM):
+\begin{lstlisting}
+    0x0000    LOAD_VESSEL PANCAKE
+    0x0001    DISPENSE FLOUR, 300.0, GRAM
+    0x0002    DISPENSE MILK, 240.0, ML
+    0x0003    STIR 120, 120s
+    0x0004    PLATING_SERVE DEFAULT
+    0x0005    HALT
+\end{lstlisting}
+
+\section{Testing and Verification}
+Quality assurance was conducted using \texttt{pytest}. A test suite comprising 42 distinct unit and integration test cases was executed across all compiler phases:
+\begin{itemize}
+    \item Lexer coordinate tracking and malformed numeral detection.
+    \item Parser grammar validation and recovery from missing delimiters.
+    \item Semantic multi-error reporting and symbol table accumulation.
+    \item Intermediate representation consistency.
+    \item Optimization semantic equivalence and instruction reduction.
+    \item Target assembly cycle estimation.
+    \item Flask REST API endpoint verification.
+\end{itemize}
+All 42 test cases passed with 100\% success rate in 0.08 seconds.
+
+\section{Individual Team Contributions}
+\begin{itemize}
+    \item \textbf{[Student 1 Name - Team Lead]}: Designed compiler architecture, lexical analyzer, token structures, and central pipeline service.
+    \item \textbf{[Student 2 Name]}: Defined formal EBNF grammar, recursive-descent parser, AST node hierarchy, and syntax error synchronization.
+    \item \textbf{[Student 3 Name]}: Implemented semantic validation rules, domain knowledge base, and symbol table manager.
+    \item \textbf{[Student 4 Name]}: Developed Three-Address Code IR generation, multi-pass optimization engine, and VKM code generator.
+\end{itemize}
+
+\section{Conclusion and Future Scope}
+The Digital Cookbook project successfully demonstrates the application of formal compiler engineering techniques to domain-specific culinary automation. Future extensions include concurrent multi-vessel scheduling, physical temperature thermodynamic modeling, and hardware synthesis for real-world automated kitchen actuators.
+
+\section*{References}
+\begin{thebibliography}{00}
+\bibitem{aho} A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, \textit{Compilers: Principles, Techniques, and Tools}, 2nd ed. Boston, MA: Addison-Wesley, 2006.
+\bibitem{cooper} K. D. Cooper and L. Torczon, \textit{Engineering a Compiler}, 2nd ed. Burlington, MA: Morgan Kaufmann, 2011.
+\bibitem{muchnick} S. S. Muchnick, \textit{Advanced Compiler Design and Implementation}. San Francisco, CA: Morgan Kaufmann, 1997.
+\bibitem{reference_repo} K. Yadav, ``Cookbook Compiler: A Cooking-Oriented DSL Implementation,'' GitHub Repository, 2024. [Online]. Available: \url{https://github.com/antedotee/cookbook-compiler}.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,16 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 15: Invalid Instruction Execution Order
+// Attempting to cook and mix an empty vessel prior to adding ingredients
+// ============================================================================
+
+RECIPE PANCAKE;
+
+# Error: Attempting to fry and mix before adding any ingredients!
+FRY(5, MINUTES);
+MIX(3, MINUTES);
+
+ADD(2, CUP, FLOUR);
+ADD(1, PIECE, EGG);
+ADD(1, CUP, MILK);
+
+SERVE;

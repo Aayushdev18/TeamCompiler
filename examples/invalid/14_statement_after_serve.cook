@@ -1,0 +1,19 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 14: Statement Appearing After SERVE
+// SERVE must be the terminating instruction; additional actions are illegal
+// ============================================================================
+
+RECIPE PANCAKE;
+
+ADD(2, CUP, FLOUR);
+ADD(1, PIECE, EGG);
+ADD(1, CUP, MILK);
+
+MIX(3, MINUTES);
+FRY(5, MINUTES);
+
+SERVE;
+
+// Illegal post-serve instructions:
+ADD(1, TBSP, SYRUP);
+FRY(2, MINUTES);

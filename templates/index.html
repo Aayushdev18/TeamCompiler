@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Cookbook — Interactive Compiler Design IDE</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- TOP NAVIGATION BAR -->
+        <header class="top-nav">
+            <div class="brand">
+                <div class="logo-icon">🍳</div>
+                <div class="brand-text">
+                    <h1>DIGITAL COOKBOOK</h1>
+                    <span class="subtitle">An Interactive Domain-Specific Language Compiler</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-indicator ready" id="global-status">
+                    <span class="status-dot"></span>
+                    <span class="status-label" id="status-text">Compiler Ready</span>
+                </div>
+
+                <div class="metric-pill" id="compile-metrics" style="display: none;">
+                    <span id="metric-time">0 ms</span>
+                </div>
+
+                <button class="nav-btn" id="docs-btn" title="View Formal Grammar & Architecture">
+                    <span class="btn-icon">📖</span> Docs & Reference
+                </button>
+
+                <button class="nav-btn theme-toggle" id="theme-btn" title="Toggle Light/Dark Theme">
+                    <span id="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN TWO-PANEL WORKSPACE -->
+        <main class="workspace">
+            <!-- LEFT PANEL: SOURCE CODE EDITOR -->
+            <section class="editor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="title-icon">📝</span>
+                        <span>Cookbook DSL Editor</span>
+                    </div>
+
+                    <div class="editor-controls">
+                        <div class="dropdown-wrapper">
+                            <select id="example-select" aria-label="Load Example Recipe">
+                                <option value="" disabled selected>Loading examples...</option>
+                            </select>
+                        </div>
+
+                        <button class="action-btn primary" id="compile-btn" title="Compile Recipe (Ctrl/Cmd + Enter)">
+                            <span class="btn-icon">⚡</span> Compile
+                        </button>
+                        <button class="action-btn" id="reset-btn" title="Reset to Default Pancake Recipe">
+                            <span class="btn-icon">↺</span> Reset
+                        </button>
+                        <button class="action-btn" id="clear-btn" title="Clear Editor">
+                            <span class="btn-icon">✕</span> Clear
+                        </button>
+                        <button class="action-btn" id="copy-source-btn" title="Copy Source Code">
+                            <span class="btn-icon">📋</span> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CODE EDITOR WITH LINE NUMBERS -->
+                <div class="code-editor-wrapper">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea 
+                        id="code-editor" 
+                        spellcheck="false" 
+                        placeholder="// Enter Cookbook DSL instructions here...&#10;RECIPE PANCAKE;&#10;ADD(2, CUP, FLOUR);&#10;SERVE;"
+                    ></textarea>
+                </div>
+
+                <!-- DIAGNOSTICS BANNER -->
+                <div class="diagnostics-bar" id="diagnostics-bar">
+                    <div class="diag-header">
+                        <span class="diag-title">Diagnostics & Status</span>
+                        <span class="diag-count" id="diag-count">0 issues</span>
+                    </div>
+                    <div class="diag-content" id="diag-content">
+                        <div class="empty-diag">Ready to compile. Press <strong>Compile (⚡)</strong> or <strong>Ctrl+Enter</strong> to run.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: COMPILER PHASES INTERACTIVE TABS -->
+            <section class="output-panel">
+                <div class="phase-tabs-bar">
+                    <button class="phase-tab active" data-phase="lexer">
+                        <span class="phase-num">1</span>
+                        <span class="phase-name">Lexer</span>
+                        <span class="phase-badge badge-neutral" id="badge-lexer">-</span>
+                    </button>
+                    <button class="phase-tab" data-phase="parser">
+                        <span class="phase-num">2</span>
+                        <span class="phase-name">Parser & AST</span>
+                        <span class="phase-badge badge-neutral" id="badge-parser">-</span>
+                    </button>
+                    <button class="phase-tab" data-phase="semantic">
+                        <span class="phase-num">3</span>
+                        <span class="phase-name">Semantic & Symbols</span>
+                        <span class="phase-badge badge-neutral" id="badge-semantic">-</span>
+                    </button>
+                    <button class="phase-tab" data-phase="ir">
+                        <span class="phase-num">4</span>
+                        <span class="phase-name">Intermediate (IR)</span>
+                        <span class="phase-badge badge-neutral" id="badge-ir">-</span>
+                    </button>
+                    <button class="phase-tab" data-phase="optimizer">
+                        <span class="phase-num">5</span>
+                        <span class="phase-name">Optimization</span>
+                        <span class="phase-badge badge-neutral" id="badge-optimizer">-</span>
+                    </button>
+                    <button class="phase-tab" data-phase="codegen">
+                        <span class="phase-num">6</span>
+                        <span class="phase-name">Target Code (VKM)</span>
+                        <span class="phase-badge badge-neutral" id="badge-codegen">-</span>
+                    </button>
+                </div>
+
+                <!-- TAB PANES CONTAINER -->
+                <div class="tab-content-area">
+                    <!-- PHASE 1: LEXICAL ANALYSIS PANE -->
+                    <div class="phase-pane active" id="pane-lexer">
+                        <div class="pane-toolbar">
+                            <div class="filter-group">
+                                <label for="token-filter">Category:</label>
+                                <select id="token-filter">
+                                    <option value="ALL">All Tokens</option>
+                                    <option value="Keyword">Keywords</option>
+                                    <option value="Measurement Unit">Units</option>
+                                    <option value="Time Unit">Time Units</option>
+                                    <option value="Numeric Constant">Constants</option>
+                                    <option value="Identifier">Identifiers</option>
+                                    <option value="Delimiter">Delimiters</option>
+                                </select>
+                            </div>
+                            <input type="text" id="token-search" placeholder="Search lexeme or type..." class="search-input">
+                            <span class="stat-pill" id="token-count-pill">Tokens: 0</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="tokens-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Lexeme</th>
+                                        <th>Token Type</th>
+                                        <th>Category</th>
+                                        <th>Line</th>
+                                        <th>Column</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="6" class="table-empty">Compile code to inspect token stream.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PHASE 2: SYNTAX ANALYSIS & AST PANE -->
+                    <div class="phase-pane" id="pane-parser">
+                        <div class="pane-toolbar">
+                            <div class="btn-group">
+                                <button class="action-btn small active" id="ast-tree-view-btn">Tree Visualizer</button>
+                                <button class="action-btn small" id="ast-json-view-btn">AST JSON</button>
+                            </div>
+                            <button class="action-btn small" id="expand-all-ast-btn">Expand All</button>
+                            <button class="action-btn small" id="collapse-all-ast-btn">Collapse All</button>
+                        </div>
+                        <div class="ast-container">
+                            <div id="ast-tree-view" class="ast-tree-canvas">
+                                <div class="empty-state">Compile a valid program to generate the Abstract Syntax Tree.</div>
+                            </div>
+                            <div id="ast-json-view" class="ast-json-canvas" style="display: none;">
+                                <pre><code id="ast-json-code">// Abstract Syntax Tree JSON representation</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHASE 3: SEMANTIC ANALYSIS & SYMBOL TABLE PANE -->
+                    <div class="phase-pane" id="pane-semantic">
+                        <div class="pane-split-vertical">
+                            <!-- SYMBOL TABLE SECTION -->
+                            <div class="split-section">
+                                <div class="section-title">
+                                    <span>Culinary Symbol Table</span>
+                                    <span class="stat-pill" id="symbol-count-pill">Symbols: 0</span>
+                                </div>
+                                <div class="table-container">
+                                    <table class="data-table" id="symbols-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Identifier</th>
+                                                <th>Category</th>
+                                                <th>Data Type</th>
+                                                <th>Unit</th>
+                                                <th>Total Qty</th>
+                                                <th>Occurrences</th>
+                                                <th>Location</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="7" class="table-empty">Symbol table is empty.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- VALIDATION CHECKLIST SECTION -->
+                            <div class="split-section">
+                                <div class="section-title">
+                                    <span>Semantic Domain Rules Checklist</span>
+                                </div>
+                                <div class="checklist-container" id="checklist-container">
+                                    <div class="empty-state">Semantic validation rules will appear here.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHASE 4: INTERMEDIATE REPRESENTATION PANE -->
+                    <div class="phase-pane" id="pane-ir">
+                        <div class="pane-toolbar">
+                            <span class="pane-info">Three-Address Code (3AC) Intermediate Representation</span>
+                            <button class="action-btn small" id="copy-ir-btn">📋 Copy IR</button>
+                        </div>
+                        <div class="code-listing-container">
+                            <div class="code-listing" id="ir-listing">
+                                <div class="empty-state">Intermediate representation instructions will be generated after semantic checks pass.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHASE 5: CODE OPTIMIZATION PANE -->
+                    <div class="phase-pane" id="pane-optimizer">
+                        <div class="pane-toolbar">
+                            <div class="opt-metrics-banner" id="opt-metrics-banner">
+                                <div class="metric-box">
+                                    <span class="metric-num" id="opt-before-num">0</span>
+                                    <span class="metric-label">Instructions Before</span>
+                                </div>
+                                <div class="metric-arrow">➔</div>
+                                <div class="metric-box">
+                                    <span class="metric-num" id="opt-after-num">0</span>
+                                    <span class="metric-label">Instructions After</span>
+                                </div>
+                                <div class="metric-box highlight">
+                                    <span class="metric-num" id="opt-reduction-pct">0%</span>
+                                    <span class="metric-label">Reduction</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SIDE-BY-SIDE IR COMPARISON -->
+                        <div class="opt-diff-container">
+                            <div class="diff-column">
+                                <div class="diff-header">Original 3AC IR</div>
+                                <div class="diff-body" id="ir-original-diff">
+                                    <div class="empty-state">Original IR</div>
+                                </div>
+                            </div>
+                            <div class="diff-column">
+                                <div class="diff-header">Optimized 3AC IR</div>
+                                <div class="diff-body" id="ir-optimized-diff">
+                                    <div class="empty-state">Optimized IR</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OPTIMIZATION PASSES & EXPLANATION DETAILS -->
+                        <div class="transformations-container">
+                            <div class="section-title">Applied Transformation Passes & Safety Justifications</div>
+                            <div id="transformations-list" class="transformations-list">
+                                <div class="empty-state">No optimization transformations applied yet.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHASE 6: TARGET CODE GENERATION PANE -->
+                    <div class="phase-pane" id="pane-codegen">
+                        <div class="pane-toolbar">
+                            <span class="pane-info">Virtual Kitchen Machine (VKM) Bytecode Assembly</span>
+                            <div class="btn-group">
+                                <span class="stat-pill" id="vkm-cycle-pill">Total Cycles: 0</span>
+                                <button class="action-btn small" id="copy-vkm-btn">📋 Copy Assembly</button>
+                            </div>
+                        </div>
+
+                        <div class="vkm-layout">
+                            <div class="vkm-code-wrapper">
+                                <pre><code id="vkm-assembly-code">; Virtual Kitchen Machine (VKM) Target Assembly
+; Compile a valid program to generate machine code.</code></pre>
+                            </div>
+
+                            <div class="vkm-isa-card">
+                                <h3>VKM Architecture Reference</h3>
+                                <p class="vkm-desc">The Virtual Kitchen Machine is an automated culinary execution processor executing deterministic timed operations.</p>
+                                <ul class="isa-list">
+                                    <li><code>LOAD_VESSEL &lt;DISH&gt;</code>: Mounts automated bowl.</li>
+                                    <li><code>DISPENSE &lt;ING&gt;, &lt;QTY&gt;, &lt;UNIT&gt;</code>: Engages ingredient dispenser feeder.</li>
+                                    <li><code>STIR &lt;RPM&gt;, &lt;SEC&gt;</code>: Sets mechanical whisk/stirrer rate.</li>
+                                    <li><code>HEAT_BOIL &lt;TEMP_C&gt;, &lt;SEC&gt;</code>: Engages induction boiling plate.</li>
+                                    <li><code>HEAT_BAKE &lt;TEMP_C&gt;, &lt;SEC&gt;</code>: Regulates convection oven heat.</li>
+                                    <li><code>HEAT_FRY &lt;TEMP_C&gt;, &lt;SEC&gt;</code>: Regulates griddle frying surface.</li>
+                                    <li><code>PLATING_SERVE</code>: Discharges finished dish to plating station.</li>
+                                    <li><code>HALT</code>: Terminates processor execution.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- DOCUMENTATION & REFERENCE MODAL -->
+        <div class="modal-backdrop" id="docs-modal" style="display: none;">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Digital Cookbook — Language & Compiler Specification</h2>
+                    <button class="modal-close-btn" id="modal-close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <h3>1. Formal EBNF Grammar</h3>
+                    <pre><code>program         ::= recipe_decl statement_list serve_stmt EOF ;
+recipe_decl     ::= "RECIPE" identifier ";" ;
+statement_list  ::= { statement } ;
+statement       ::= add_stmt | timed_stmt | chop_stmt ;
+add_stmt        ::= "ADD" "(" number "," unit "," identifier ")" ";" ;
+timed_stmt      ::= timed_op "(" number "," time_unit ")" ";" ;
+timed_op        ::= "MIX" | "BOIL" | "BAKE" | "FRY" | "SIMMER" | "CHILL" | "WHISK" | "REST" ;
+chop_stmt       ::= "CHOP" "(" identifier ")" ";" ;
+serve_stmt      ::= "SERVE" ";" ;
+unit            ::= "CUP" | "TBSP" | "TSP" | "GRAM" | "KG" | "ML" | "LITER" | "PIECE" | "PINCH" ;
+time_unit       ::= "SECONDS" | "MINUTES" | "HOURS" ;</code></pre>
+
+                    <h3>2. Supported Dishes & Requirements</h3>
+                    <ul>
+                        <li><strong>PANCAKE</strong>: Requires FLOUR, MILK, EGG. Supports FRY, MIX, WHISK.</li>
+                        <li><strong>SPONGE_CAKE</strong>: Requires FLOUR, SUGAR, EGG, BUTTER. Supports BAKE, MIX.</li>
+                        <li><strong>PASTA</strong>: Requires PASTA, WATER, SALT. Supports BOIL, FRY, MIX.</li>
+                        <li><strong>HERBAL_TEA</strong>: Requires WATER, TEA_LEAVES. Supports BOIL, SIMMER.</li>
+                        <li><strong>FRENCH_OMELETTE</strong>: Requires EGG, BUTTER, SALT. Supports FRY, WHISK.</li>
+                        <li><strong>FRESH_SALAD</strong>: Requires LETTUCE, TOMATO, OIL. Supports CHOP, MIX, CHILL.</li>
+                    </ul>
+
+                    <h3>3. Optimization Passes</h3>
+                    <ol>
+                        <li><strong>Unit Normalization</strong>: Converts volume to ML, mass to GRAM, and durations to SECONDS.</li>
+                        <li><strong>Adjacent Instruction Merging</strong>: Combines contiguous additions of identical ingredients and contiguous timed actions.</li>
+                        <li><strong>Dead Code Elimination</strong>: Prunes zero-quantity and zero-duration operations.</li>
+                    </ol>
+
+                    <h3>4. Acknowledgements</h3>
+                    <p>Architectural inspiration derived from the open-source Cookbook Compiler reference by Kartik Yadav (github.com/antedotee/cookbook-compiler), re-engineered with original AST structures, full optimization pipelines, and Virtual Kitchen Machine code generation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="/static/js/ast_visualizer.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

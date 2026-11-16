@@ -1,0 +1,16 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 11: Semantic Error — Unrecognized Ingredient
+// Fails because DRAGON_SCALE is not in the culinary domain vocabulary
+// ============================================================================
+
+RECIPE PANCAKE;
+
+ADD(2, CUP, FLOUR);
+ADD(1, PIECE, EGG);
+ADD(100, GRAM, DRAGON_SCALE);
+ADD(1, CUP, MILK);
+
+MIX(3, MINUTES);
+FRY(5, MINUTES);
+
+SERVE;

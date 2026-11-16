@@ -1,0 +1,18 @@
+// ============================================================================
+// DIGITAL COOKBOOK — Example 08: Zero-Reduction Recipe (Already Canonical)
+// Demonstrates pipeline behavior when source is already in canonical base form
+// ============================================================================
+
+RECIPE PANCAKE;
+
+# All ingredients are already specified in base units (GRAM, ML, PIECE)
+ADD(250, GRAM, FLOUR);
+ADD(240, ML, MILK);
+ADD(1, PIECE, EGG);
+
+# Single timed operation already in seconds
+MIX(180, SECONDS);
+
+FRY(240, SECONDS);
+
+SERVE;
